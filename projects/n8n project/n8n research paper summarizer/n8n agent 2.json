@@ -1,0 +1,178 @@
+{
+  "name": "My workflow 6",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        -64
+      ],
+      "id": "8b4eff81-9e76-4505-9c64-5ca7256b33d2",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c62f9a0b-f1cf-4a36-a155-6df0c15d6532",
+              "name": "topic",
+              "value": "large language model reasoning",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -192,
+        -64
+      ],
+      "id": "5925e659-e2c2-4e97-aa3c-32f63162eeb9",
+      "name": "Define Topic"
+    },
+    {
+      "parameters": {
+        "url": "=http://export.arxiv.org/api/query?search_query=all:{{ $json.topic.replace(' ', '+') }}&sortBy=relevance&sortOrder=descending&max_results=5",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        16,
+        -64
+      ],
+      "id": "2ec17eaf-3f0e-48b2-b3b2-37599898a022",
+      "name": "Query ArXiv"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.xml",
+      "typeVersion": 1,
+      "position": [
+        224,
+        -64
+      ],
+      "id": "6ea7ad6d-050d-42b3-bbf9-c708b7552525",
+      "name": "XML"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst item = $input.item;\n\nconst papers = item.json.feed.entry;\n\nreturn papers.map(paper => ({ json: paper }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        432,
+        -64
+      ],
+      "id": "d3bfe556-39bb-4408-ada8-173e273685bf",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sarthakarthak.app.n8n.cloud/webhook-test/dba0f287-7be2-40b2-a8bb-30479f8a6604",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        -64
+      ],
+      "id": "a8ee0635-39bf-4896-95ca-a3955fb5241c",
+      "name": "HTTP Request"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Define Topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Define Topic": {
+      "main": [
+        [
+          {
+            "node": "Query ArXiv",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query ArXiv": {
+      "main": [
+        [
+          {
+            "node": "XML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "XML": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "185efcd1-4f1c-4129-b8e9-400db2c9fcc5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5766f20dd0c659414ec4356249d6c12754ea68d3540cea111dc032132004e6fb"
+  },
+  "id": "g5I6HtFAIoRmu9tV",
+  "tags": []
+}

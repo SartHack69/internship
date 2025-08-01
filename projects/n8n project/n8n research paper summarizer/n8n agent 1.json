@@ -1,0 +1,209 @@
+{
+  "name": "My workflow 5",
+  "nodes": [
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an expert research assistant. Your task is to analyze the following academic paper abstract and provide a structured summary in JSON format.\n\nDo not include any text outside of the final JSON object.\n\nPaper Title: \"{{ $json.body.title }}\"\nPaper Abstract: \"{{ $json.body.summary }}\"\n\nBased on the information above, generate a JSON object with the following keys:\n- \"summary\": A concise, one-paragraph summary of the paper's core contribution.\n- \"key_findings\": A bulleted list (as a single string with newlines `\\n- `) of the top 3 most important findings or results.\n- \"potential_applications\": A brief description of the potential real-world applications or implications of this research.\n\nJSON Response:"
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -1248,
+        -160
+      ],
+      "id": "d46539c4-1fb8-4d7b-b5d8-bf48c952c937",
+      "name": "Generate Summary",
+      "credentials": {
+        "openAiApi": {
+          "id": "A9P9LtLTFCQ8V75q",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "89ec0eef-ba4b-4dd5-bafc-a29aae26bd72",
+              "name": "title",
+              "value": "={{ $('Webhook').item.json.body.title }}",
+              "type": "string"
+            },
+            {
+              "id": "28e38df0-5b80-44af-ad15-21fe67d4b1bd",
+              "name": "url",
+              "value": "={{ $('Webhook').item.json.body.id }}",
+              "type": "string"
+            },
+            {
+              "id": "a2cde676-e216-4c5f-9542-3c2af433601a",
+              "name": "authors",
+              "value": "={{ Array.isArray($('Webhook').item.json.body.author) ? $('Webhook').item.json.body.author.map(a => a.name).join(', ') : $('Webhook').item.json.body.author.name }}",
+              "type": "string"
+            },
+            {
+              "id": "cb4a81b6-e5e1-4167-987f-6613f03d6b78",
+              "name": "summary",
+              "value": "={{ $json.message.content.summary }}",
+              "type": "string"
+            },
+            {
+              "id": "8bc3a921-51e1-491e-befb-2150f4309543",
+              "name": "key_findings",
+              "value": "={{ $json.message.content.key_findings }}",
+              "type": "string"
+            },
+            {
+              "id": "61a68b18-b44c-4df0-8945-89859a079ff5",
+              "name": "potential_applications",
+              "value": "={{ $json.message.content.potential_applications }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -720,
+        -144
+      ],
+      "id": "16b840a1-75d9-4c16-a9af-7ba32ec9d557",
+      "name": "Format for Notion"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "dba0f287-7be2-40b2-a8bb-30479f8a6604",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1504,
+        -160
+      ],
+      "id": "b1425f65-46e1-470d-a00f-43ddec28c5d8",
+      "name": "Webhook",
+      "webhookId": "dba0f287-7be2-40b2-a8bb-30479f8a6604"
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "24192701-ea02-8084-9d72-f4661c4029f5",
+          "mode": "list",
+          "cachedResultName": "N8N",
+          "cachedResultUrl": "https://www.notion.so/24192701ea0280849d72f4661c4029f5"
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Authors|rich_text",
+              "textContent": "={{ $json.authors }}"
+            },
+            {
+              "key": "Key findings|rich_text",
+              "textContent": "={{ $json.key_findings }}"
+            },
+            {
+              "key": "URL|rich_text",
+              "textContent": "={{ $json.url }}"
+            },
+            {
+              "key": "Potential applications|rich_text",
+              "textContent": "={{ $json.potential_applications }}"
+            },
+            {
+              "key": "Summary|rich_text",
+              "textContent": "={{ $json.summary }}"
+            },
+            {
+              "key": "Title|title",
+              "title": "={{ $json.title }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        -464,
+        -176
+      ],
+      "id": "6dfb62e2-7ee0-4f20-96c1-7cc106483bd0",
+      "name": "Create a database page",
+      "credentials": {
+        "notionApi": {
+          "id": "pxZaoWTZZLxS6Mxq",
+          "name": "Notion account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Generate Summary": {
+      "main": [
+        [
+          {
+            "node": "Format for Notion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format for Notion": {
+      "main": [
+        [
+          {
+            "node": "Create a database page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Generate Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "419905ba-91cf-4e06-a154-5986c5e538c3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5766f20dd0c659414ec4356249d6c12754ea68d3540cea111dc032132004e6fb"
+  },
+  "id": "F8n1FG42hR3lDVbb",
+  "tags": []
+}
